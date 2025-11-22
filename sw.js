@@ -1,6 +1,6 @@
 // JollyKite Service Worker
-const CACHE_NAME = 'jollykite-v1.1.8';
-const API_CACHE_NAME = 'jollykite-api-v1.1.8';
+const CACHE_NAME = 'jollykite-v1.2.0';
+const API_CACHE_NAME = 'jollykite-api-v1.2.0';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
 
 // Ресурсы для кэширования при установке
@@ -9,6 +9,7 @@ const CORE_ASSETS = [
   '/index.html',
   '/manifest.json',
   '/kiter.png',
+  '/favicon.ico',
   '/images/map-background.png',
   '/css/main.css',
   '/js/config.js',
@@ -20,6 +21,7 @@ const CORE_ASSETS = [
   '/js/WindArrowController.js',
   '/js/WindStatistics.js',
   '/js/HistoryManager.js',
+  '/js/InstallPrompt.js',
   'https://cdn.tailwindcss.com/',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',

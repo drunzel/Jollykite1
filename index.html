@@ -301,9 +301,11 @@
     <!-- ES6 Module Import for App -->
     <script type="module">
         import App from './js/App.js';
+        import InstallPrompt from './js/InstallPrompt.js';
 
         // Global app instance
         let jollyKiteApp;
+        let installPrompt;
 
         // Initialize the app when DOM is ready
         document.addEventListener('DOMContentLoaded', async function() {
@@ -318,6 +320,13 @@
 
                     // Make app available globally for debugging
                     window.jollyKiteApp = jollyKiteApp;
+
+                    // Initialize install prompt
+                    installPrompt = new InstallPrompt();
+                    window.installPrompt = installPrompt;
+
+                    // Show iOS instructions if applicable
+                    InstallPrompt.showIOSInstructions();
 
                     // Setup update countdown
                     setupUpdateCountdown();

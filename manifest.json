@@ -4,12 +4,16 @@
   "description": "Прогноз ветра и условия для кайтсерфинга в Пак Нам Пран, Таиланд",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
   "background_color": "#1e293b",
   "theme_color": "#0ea5e9",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "ru",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "categories": ["sports", "weather", "travel"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
