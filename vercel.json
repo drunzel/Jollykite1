@@ -1,6 +1,9 @@
 {
   "version": 2,
   "name": "jollykite",
+  "buildCommand": "echo 'No build required - static site'",
+  "outputDirectory": ".",
+  "installCommand": "echo 'No install required'",
   "headers": [
     {
       "source": "/(.*)",
