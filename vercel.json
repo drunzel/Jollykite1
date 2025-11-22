@@ -1,12 +1,6 @@
 {
   "version": 2,
   "name": "jollykite",
-  "crons": [
-    {
-      "path": "/api/collect-wind-data",
-      "schedule": "*/5 * * * *"
-    }
-  ],
   "routes": [
     {
       "src": "/sw.js",
