@@ -1,6 +1,7 @@
 {
   "name": "jollykite",
   "version": "1.0.0",
+  "type": "module",
   "description": "Wind monitoring PWA for kitesurfing at Pak Nam Pran, Thailand",
   "main": "server.js",
   "scripts": {
