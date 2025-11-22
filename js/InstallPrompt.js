@@ -273,27 +273,40 @@ class InstallPrompt {
                 right: 0;
                 background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
                 color: white;
-                padding: 15px;
+                padding: 20px 15px;
                 text-align: center;
                 z-index: 9999;
                 animation: slideUp 0.3s ease-out;
-                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             `;
             banner.innerHTML = `
-                <div style="font-size: 14px; margin-bottom: 5px;">
-                    📱 Установите JollyKite на свой iPhone
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">
+                    📱 Установите JollyKite на iPhone
                 </div>
-                <div style="font-size: 12px; opacity: 0.9;">
-                    Нажмите
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="vertical-align: middle; display: inline;">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                    </svg>
-                    затем "На экран Домой"
+                <div style="font-size: 13px; line-height: 1.6; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
+                        <span>1. Нажмите</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" style="vertical-align: middle;">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            <line x1="12" y1="16" x2="12" y2="18"></line>
+                        </svg>
+                        <span style="font-weight: 600;">"Поделиться"</span>
+                        <span>(внизу экрана)</span>
+                    </div>
+                    <div style="margin-top: 6px;">
+                        2. Выберите <span style="font-weight: 600;">"На экран Домой"</span>
+                    </div>
+                    <div style="margin-top: 6px;">
+                        3. Нажмите <span style="font-weight: 600;">"Добавить"</span>
+                    </div>
+                </div>
+                <div style="font-size: 11px; opacity: 0.85; margin-top: 10px;">
+                    ⚡ Запускайте как обычное приложение!
                 </div>
                 <button onclick="this.parentElement.style.display='none'"
-                        style="position: absolute; top: 5px; right: 10px; background: none; border: none; color: white; font-size: 20px; cursor: pointer;">
+                        style="position: absolute; top: 8px; right: 12px; background: rgba(255,255,255,0.2); border: none; color: white; font-size: 18px; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                     ✕
                 </button>
             `;
@@ -302,13 +315,13 @@ class InstallPrompt {
             if (!document.getElementById('ios-install-banner')) {
                 document.body.appendChild(banner);
 
-                // Автоматически скрываем через 10 секунд
+                // Автоматически скрываем через 15 секунд (дольше, чтобы успели прочитать)
                 setTimeout(() => {
                     if (banner && banner.parentElement) {
                         banner.style.animation = 'slideDown 0.3s ease-out';
                         setTimeout(() => banner.remove(), 300);
                     }
-                }, 10000);
+                }, 15000);
             }
         }
     }
