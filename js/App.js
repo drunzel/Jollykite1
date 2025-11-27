@@ -102,7 +102,9 @@ class App {
             console.log('✓ Данные о ветре загружены');
         } catch (error) {
             console.error('⚠ Ошибка загрузки данных о ветре:', error);
-            this.showWindError('Ошибка загрузки данных о ветре');
+            console.error('Error details:', error.message, error.stack);
+            const t = (key) => this.languageManager.t(key);
+            this.showWindError(t('errorLoadingData'));
         }
 
         // Загрузка прогноза
