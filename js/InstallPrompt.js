@@ -22,6 +22,20 @@ class InstallPrompt {
             this.showInstallButton();
         });
 
+        // Для Android: показываем кнопку через 3 секунды, даже если событие не сработало
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isInstalled = window.matchMedia('(display-mode: standalone)').matches;
+
+        if (isAndroid && !isInstalled) {
+            console.log('[InstallPrompt] Android detected, showing button after delay');
+            setTimeout(() => {
+                if (!this.deferredPrompt && !this.installButton) {
+                    console.log('[InstallPrompt] No beforeinstallprompt event, showing fallback button');
+                    this.showFallbackInstallButton();
+                }
+            }, 3000);
+        }
+
         // Отслеживаем успешную установку
         window.addEventListener('appinstalled', () => {
             console.log('[InstallPrompt] PWA was installed');
@@ -253,6 +267,87 @@ class InstallPrompt {
         }
 
         return true;
+    }
+
+    /**
+     * Показываем fallback кнопку для Android когда beforeinstallprompt не сработал
+     */
+    showFallbackInstallButton() {
+        // Создаем упрощенную кнопку с инструкцией
+        const buttonContainer = document.createElement('div');
+        buttonContainer.id = 'pwa-install-container';
+        buttonContainer.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            animation: slideUp 0.3s ease-out;
+            max-width: 90%;
+        `;
+
+        const button = document.createElement('button');
+        button.id = 'pwa-install-button';
+        button.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="margin-right: 8px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Установить приложение
+        `;
+        button.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        `;
+
+        button.addEventListener('click', () => {
+            // Показываем инструкцию для ручной установки
+            alert('Для установки приложения:\n\n1. Нажмите на меню браузера (⋮)\n2. Выберите "Установить приложение" или "Добавить на главный экран"\n3. Нажмите "Установить"');
+        });
+
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '✕';
+        closeButton.style.cssText = `
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+        closeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            buttonContainer.remove();
+        });
+
+        buttonContainer.appendChild(button);
+        buttonContainer.appendChild(closeButton);
+        document.body.appendChild(buttonContainer);
+
+        this.installButton = buttonContainer;
+
+        console.log('[InstallPrompt] Fallback install button created');
     }
 
     /**
