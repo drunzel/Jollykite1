@@ -7,6 +7,7 @@ import WindArrowController from './WindArrowController.js';
 import HistoryManager from './HistoryManager.js';
 import WindStatistics from './WindStatistics.js';
 import LanguageManager from './LanguageManager.js';
+import HistoryDisplay from './HistoryDisplay.js';
 
 class App {
     constructor() {
@@ -19,6 +20,7 @@ class App {
         this.forecastManager = new ForecastManager(this.languageManager);
         this.historyManager = new HistoryManager();
         this.windStatistics = new WindStatistics();
+        this.historyDisplay = null; // Будет инициализирован после historyManager
 
         this.windArrowController = null; // Будет инициализирован после карты
         this.updateInterval = null;
@@ -67,6 +69,14 @@ class App {
                 console.warn('⚠ История недоступна (localStorage не поддерживается)');
             } else {
                 console.log('✓ Менеджер истории готов');
+            }
+
+            // Инициализация отображения истории
+            this.historyDisplay = new HistoryDisplay(this.historyManager, this.languageManager);
+            if (!this.historyDisplay.init()) {
+                console.warn('⚠ Не удалось инициализировать отображение истории');
+            } else {
+                console.log('✓ Отображение истории инициализировано');
             }
 
             // Загрузка первоначальных данных
@@ -138,6 +148,11 @@ class App {
             // Сохранение в историю
             if (this.historyManager.isStorageAvailable()) {
                 this.historyManager.saveWindData(windData);
+
+                // Обновление отображения истории
+                if (this.historyDisplay) {
+                    this.historyDisplay.refresh();
+                }
             }
 
             return windData;
@@ -491,6 +506,11 @@ class App {
             // Refresh forecast with new language
             if (this.forecastManager) {
                 this.updateForecast();
+            }
+
+            // Refresh history display with new language
+            if (this.historyDisplay) {
+                this.historyDisplay.refresh();
             }
 
             console.log('✓ Language switched to:', lang);

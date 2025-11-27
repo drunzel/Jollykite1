@@ -87,7 +87,23 @@ const translations = {
         // Errors
         errorLoading: 'Ошибка загрузки',
         errorLoadingData: 'Ошибка загрузки данных о ветре',
-        errorLoadingForecast: 'Ошибка загрузки прогноза'
+        errorLoadingForecast: 'Ошибка загрузки прогноза',
+
+        // History
+        historyTitle: '📊 История измерений ветра',
+        loadingHistory: 'Загружаем историю...',
+        time: 'Время',
+        speed: 'Скорость',
+        status: 'Статус',
+        showing: 'Показано',
+        of: 'из',
+        entries: 'записей',
+        clearHistory: 'Очистить историю',
+        confirmClearHistory: 'Вы уверены, что хотите очистить всю историю измерений?',
+        noHistoryYet: 'История пока пуста',
+        historyWillAppear: 'Данные начнут появляться после первого измерения',
+        justNow: 'только что',
+        oneMinuteAgo: '1 мин назад'
     },
 
     en: {
@@ -173,7 +189,23 @@ const translations = {
         // Errors
         errorLoading: 'Loading error',
         errorLoadingData: 'Error loading wind data',
-        errorLoadingForecast: 'Error loading forecast'
+        errorLoadingForecast: 'Error loading forecast',
+
+        // History
+        historyTitle: '📊 Wind History',
+        loadingHistory: 'Loading history...',
+        time: 'Time',
+        speed: 'Speed',
+        status: 'Status',
+        showing: 'Showing',
+        of: 'of',
+        entries: 'entries',
+        clearHistory: 'Clear history',
+        confirmClearHistory: 'Are you sure you want to clear all wind history?',
+        noHistoryYet: 'No history yet',
+        historyWillAppear: 'Data will appear after first measurement',
+        justNow: 'just now',
+        oneMinuteAgo: '1 min ago'
     }
 };
 
