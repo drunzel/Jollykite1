@@ -108,6 +108,70 @@
             eruda.init();
             console.log('📱 Eruda mobile console initialized - tap the green icon in bottom right');
         }
+
+        // Clear cache function for debugging
+        window.clearAllCaches = async function() {
+            console.log('🗑️ Clearing all caches...');
+
+            // 1. Unregister service workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                    console.log('✓ Service Worker unregistered');
+                }
+            }
+
+            // 2. Clear all caches
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (let cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                    console.log('✓ Cache deleted:', cacheName);
+                }
+            }
+
+            // 3. Clear localStorage
+            localStorage.clear();
+            console.log('✓ localStorage cleared');
+
+            // 4. Clear sessionStorage
+            sessionStorage.clear();
+            console.log('✓ sessionStorage cleared');
+
+            console.log('✅ All caches cleared! Reloading...');
+
+            // Reload page
+            setTimeout(() => location.reload(true), 500);
+        }
+
+        // Show clear cache button if ?debug=true
+        if (window.location.href.includes('?debug=true') || window.location.href.includes('?nocache=')) {
+            window.addEventListener('load', () => {
+                const btn = document.createElement('button');
+                btn.textContent = '🗑️ Очистить кеш';
+                btn.style.cssText = `
+                    position: fixed;
+                    top: 70px;
+                    right: 20px;
+                    z-index: 99999;
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                `;
+                btn.onclick = () => {
+                    if (confirm('Очистить весь кеш и перезагрузить?')) {
+                        window.clearAllCaches();
+                    }
+                };
+                document.body.appendChild(btn);
+            });
+        }
     </script>
 </head>
 <body>
