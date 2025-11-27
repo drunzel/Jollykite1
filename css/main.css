@@ -218,6 +218,7 @@ header {
 
 .card {
     background: rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(15px);
     backdrop-filter: blur(15px);
     border-radius: 20px;
     padding: 30px;
@@ -285,6 +286,7 @@ header {
     top: 20px;
     left: 20px;
     background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(15px);
     backdrop-filter: blur(15px);
     border-radius: 20px;
     padding: 20px;
@@ -403,6 +405,7 @@ header {
 /* Info Section */
 .info-section {
     background: rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(15px);
     backdrop-filter: blur(15px);
     border-radius: 20px;
     padding: 40px;
@@ -507,6 +510,7 @@ footer {
     justify-content: center;
     gap: 20px;
     background: rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     border-radius: 25px;
     padding: 25px 40px;
@@ -551,6 +555,7 @@ footer {
 /* Forecast Section */
 .forecast-section {
     background: rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(15px);
     backdrop-filter: blur(15px);
     border-radius: 15px;
     padding: 20px 15px;
@@ -889,6 +894,7 @@ footer {
     right: 20px;
     z-index: 99999;
     background: rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 25px;
@@ -948,5 +954,97 @@ footer {
 
     .lang-option {
         padding: 3px 6px;
+    }
+}
+
+/* Source Toggle (Data Source Selector) */
+.source-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 99999;
+    background: rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 25px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 1);
+    user-select: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.source-toggle:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.source-toggle:active {
+    transform: translateY(0);
+}
+
+.source-option {
+    padding: 6px 10px;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.source-option:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.source-option.active {
+    background: rgba(255, 255, 255, 0.35);
+    opacity: 1;
+    font-weight: 700;
+}
+
+.source-separator {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.source-icon {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+.source-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+    .source-toggle {
+        top: 65px;
+        left: 15px;
+        padding: 6px 12px;
+        font-size: 0.7rem;
+    }
+
+    .source-option {
+        padding: 3px 6px;
+        gap: 3px;
+    }
+
+    .source-icon {
+        font-size: 1em;
+    }
+
+    .source-label {
+        font-size: 0.65rem;
     }
 }
