@@ -35,6 +35,10 @@ class App {
             this.updateUILanguage();
             console.log('✓ Язык инициализирован:', this.languageManager.getCurrentLanguage());
 
+            // Инициализация переключателя источников данных
+            this.initSourceToggle();
+            console.log('✓ Переключатель источников инициализирован');
+
             // Инициализация карты
             this.mapController.initMap();
             console.log('✓ Карта инициализирована');
@@ -103,7 +107,7 @@ class App {
 
     async updateWindData() {
         try {
-            const windData = await this.windDataManager.fetchCurrentWindData();
+            const windData = await this.windDataManager.fetchCurrentWindDataFromSource();
 
             // Получение информации о безопасности
             const safety = this.windDataManager.getWindSafety(
@@ -536,6 +540,157 @@ class App {
 
     getCurrentWindData() {
         return this.lastWindData || {};
+    }
+
+    // Data Source Management Methods
+
+    /**
+     * Initialize source toggle button
+     */
+    initSourceToggle() {
+        const toggle = document.getElementById('sourceToggle');
+        if (!toggle) return;
+
+        const currentSource = this.windDataManager.getDataSource();
+        this.updateSourceToggleUI(currentSource);
+
+        // Add click handlers to source options
+        const sourceOptions = toggle.querySelectorAll('.source-option');
+        sourceOptions.forEach(option => {
+            option.addEventListener('click', (e) => {
+                const source = e.currentTarget.dataset.source;
+                if (source) {
+                    this.switchDataSource(source);
+                }
+            });
+        });
+
+        // Initialize minimum wind speed indicator
+        // COMMENTED OUT: Minimum wind speed indicator removed from UI
+        // this.updateMinWindSpeedIndicator();
+    }
+
+    /**
+     * Switch to specified data source
+     */
+    async switchDataSource(source) {
+        if (this.windDataManager.setDataSource(source)) {
+            this.updateSourceToggleUI(source);
+
+            // Show loading indicator
+            const windTitle = document.getElementById('windTitle');
+            const windSubtitle = document.getElementById('windSubtitle');
+            const t = (key) => this.languageManager.t(key);
+
+            if (windTitle) windTitle.textContent = t('loadingData');
+            if (windSubtitle) windSubtitle.textContent = t('pleaseWait');
+
+            // Refresh data from new source
+            try {
+                await this.updateWindData();
+                console.log(`✓ Data source switched to: ${config.dataSource.sources[source].name}`);
+            } catch (error) {
+                console.error('Error switching data source:', error);
+                // Show error message specific to Windguru
+                if (source === 'windguru') {
+                    if (windTitle) windTitle.textContent = 'Windguru недоступен';
+                    if (windSubtitle) windSubtitle.textContent = 'Требуется настройка backend. Используйте Ambient Weather.';
+                } else {
+                    this.showWindError('Ошибка загрузки данных');
+                }
+            }
+        }
+    }
+
+    /**
+     * Update source toggle UI
+     */
+    updateSourceToggleUI(currentSource) {
+        const sourceOptions = document.querySelectorAll('.source-option');
+        sourceOptions.forEach(option => {
+            if (option.dataset.source === currentSource) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
+    }
+
+    /**
+     * Update minimum wind speed indicator on gradient bar
+     * COMMENTED OUT: Minimum wind speed indicator removed from UI
+     */
+    /*
+    updateMinWindSpeedIndicator() {
+        const minSpeed = this.windDataManager.getMinWindSpeed();
+        const indicator = document.getElementById('minWindSpeedIndicator');
+
+        if (indicator && minSpeed > 0) {
+            const maxSpeed = 30;
+            const percentage = (minSpeed / maxSpeed) * 100;
+            indicator.style.left = `${percentage}%`;
+
+            const t = (key) => this.languageManager.t(key);
+            const currentLang = this.languageManager.getCurrentLanguage();
+            if (currentLang === 'ru') {
+                indicator.title = `Минимальная скорость: ${minSpeed} узлов`;
+            } else {
+                indicator.title = `Minimum speed: ${minSpeed} knots`;
+            }
+        }
+    }
+    */
+
+    /**
+     * Update wind display with minimum speed check
+     */
+    updateWindDisplay(windData) {
+        // Apply minimum wind speed filter
+        const filteredData = this.windDataManager.applyMinWindSpeedFilter(windData);
+
+        // Обновление скорости ветра
+        const windSpeedElement = document.getElementById('windSpeed');
+        if (windSpeedElement) {
+            windSpeedElement.textContent = windData.windSpeedKnots.toFixed(1);
+
+            // Add visual indicator if below minimum
+            if (filteredData.belowMinimum) {
+                windSpeedElement.style.opacity = '0.6';
+                windSpeedElement.title = `Ниже минимума: ${filteredData.minWindSpeed} узлов`;
+            } else {
+                windSpeedElement.style.opacity = '1';
+                windSpeedElement.title = '';
+            }
+        }
+
+        // Обновление индикатора на градиентном баре
+        const windSpeedIndicator = document.getElementById('windSpeedIndicator');
+        if (windSpeedIndicator) {
+            // Масштабируем скорость ветра на шкалу от 0 до 30+ узлов
+            const maxSpeed = 30;
+            const speed = Math.min(windData.windSpeedKnots, maxSpeed);
+            const percentage = (speed / maxSpeed) * 100;
+            windSpeedIndicator.style.left = `${percentage}%`;
+        }
+
+        // Обновление порывов ветра
+        const windGustElement = document.getElementById('windGust');
+        if (windGustElement) {
+            windGustElement.textContent = (windData.windGustKnots !== null && windData.windGustKnots !== undefined)
+                ? windData.windGustKnots.toFixed(1)
+                : '--';
+        }
+
+        // Обновление максимального порыва сегодня
+        const maxGustElement = document.getElementById('maxGust');
+        if (maxGustElement) {
+            maxGustElement.textContent = (windData.maxGustKnots !== null && windData.maxGustKnots !== undefined)
+                ? windData.maxGustKnots.toFixed(1)
+                : '--';
+        }
+
+        // Обновление направления и описания ветра
+        this.updateWindDescription(windData);
     }
 }
 
