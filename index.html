@@ -98,6 +98,17 @@
             }
         }
     </script>
+
+    <!-- Mobile Console for Debugging (Eruda) -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        // Initialize Eruda console for mobile debugging
+        // To toggle console: shake device or add ?eruda=true to URL
+        if (window.location.href.includes('?eruda=true') || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            eruda.init();
+            console.log('📱 Eruda mobile console initialized - tap the green icon in bottom right');
+        }
+    </script>
 </head>
 <body>
     <!-- Language Toggle -->
