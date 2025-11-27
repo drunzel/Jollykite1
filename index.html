@@ -472,6 +472,9 @@
         }
 
         // Register Service Worker
+        // TEMPORARILY DISABLED FOR CACHE DEBUGGING
+        // Uncomment after cache issues are resolved
+        /*
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -479,6 +482,8 @@
                     .catch(err => console.log('✗ Service Worker registration failed:', err));
             });
         }
+        */
+        console.log('⚠️ Service Worker registration DISABLED for debugging');
     </script>
 </body>
 </html>
