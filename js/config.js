@@ -7,7 +7,26 @@ const config = {
     // API Endpoints
     api: {
         ambientWeather: 'https://lightning.ambientweather.net/devices?public.slug=e63ff0d2119b8c024b5aad24cc59a504',
-        openMeteo: 'https://api.open-meteo.com/v1/forecast'
+        openMeteo: 'https://api.open-meteo.com/v1/forecast',
+        windguru: 'https://www.windguru.cz/station/5725'
+    },
+
+    // Data Source Settings
+    dataSource: {
+        default: 'ambient', // 'ambient' or 'windguru'
+        minWindSpeed: 5, // Minimum wind speed threshold in knots
+        sources: {
+            ambient: {
+                name: 'Ambient Weather',
+                label: 'AMBIENT',
+                icon: '🌡️'
+            },
+            windguru: {
+                name: 'Windguru',
+                label: 'WINDGURU',
+                icon: '🌊'
+            }
+        }
     },
 
     // Geographical Locations

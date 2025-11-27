@@ -1,7 +1,10 @@
 /**
  * Backend Data Manager
- * Handles API calls to Vercel Functions backend
+ * Handles API calls to Vercel Functions backend and external sources
  */
+
+import config from './config.js';
+import WindUtils from './utils/WindUtils.js';
 
 export default class BackendDataManager {
     constructor() {
@@ -9,6 +12,7 @@ export default class BackendDataManager {
         this.apiBaseUrl = this.getApiBaseUrl();
         this.isBackendAvailable = false;
         this.lastFetchTime = null;
+        this.currentSource = config.dataSource.default;
     }
 
     /**
@@ -155,7 +159,74 @@ export default class BackendDataManager {
         return {
             isAvailable: this.isBackendAvailable,
             apiBaseUrl: this.apiBaseUrl,
-            lastFetchTime: this.lastFetchTime
+            lastFetchTime: this.lastFetchTime,
+            currentSource: this.currentSource
         };
+    }
+
+    /**
+     * Set data source
+     */
+    setSource(source) {
+        if (config.dataSource.sources[source]) {
+            this.currentSource = source;
+            console.log(`✓ Data source switched to: ${source}`);
+            return true;
+        }
+        console.warn(`⚠ Invalid data source: ${source}`);
+        return false;
+    }
+
+    /**
+     * Get current data source
+     */
+    getSource() {
+        return this.currentSource;
+    }
+
+    /**
+     * Fetch data from Windguru station via backend proxy
+     */
+    async fetchWindguruData() {
+        try {
+            const stationId = config.api.windguru.match(/station\/(\d+)/)?.[1] || '5725';
+            const response = await fetch(`${this.apiBaseUrl}/api/windguru-proxy?station=${stationId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Windguru proxy error: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (!result.success || !result.data) {
+                throw new Error('No data available from Windguru');
+            }
+
+            this.lastFetchTime = new Date();
+
+            // Data is already in the correct format from the proxy
+            return result.data;
+
+        } catch (error) {
+            console.error('Error fetching Windguru data:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get data from current source
+     */
+    async getCurrentSourceData() {
+        if (this.currentSource === 'windguru') {
+            return await this.fetchWindguruData();
+        } else {
+            // Default to backend/Ambient Weather data
+            return await this.getLatestWindData();
+        }
     }
 }
