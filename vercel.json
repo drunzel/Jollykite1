@@ -49,7 +49,25 @@
       ]
     },
     {
-      "source": "/(js|css|icons)/(.+)",
+      "source": "/js/(.+)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/css/(.+)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/icons/(.+)",
       "headers": [
         {
           "key": "Cache-Control",
