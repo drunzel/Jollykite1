@@ -404,18 +404,63 @@
 
     <!-- ES6 Module Import for App -->
     <script type="module">
-        import App from './js/App.js';
-        import InstallPrompt from './js/InstallPrompt.js';
-
         // Global app instance
         let jollyKiteApp;
         let installPrompt;
+
+        // AGGRESSIVE CACHE CLEANUP - Run BEFORE app initialization
+        async function killAllServiceWorkersAndCaches() {
+            console.log('🔥 AGGRESSIVE CACHE CLEANUP STARTING...');
+
+            // 1. Kill all Service Workers
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                        console.log('💀 Killed Service Worker:', registration.scope);
+                    }
+
+                    // Also try to get the controller and unregister it
+                    if (navigator.serviceWorker.controller) {
+                        console.log('💀 Active controller found, forcing reload after unregister...');
+                    }
+                } catch (error) {
+                    console.error('Error unregistering SW:', error);
+                }
+            }
+
+            // 2. Delete ALL caches
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    for (let cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        console.log('🗑️ Deleted cache:', cacheName);
+                    }
+                } catch (error) {
+                    console.error('Error deleting caches:', error);
+                }
+            }
+
+            console.log('✅ AGGRESSIVE CLEANUP COMPLETE');
+        }
 
         // Initialize the app when DOM is ready
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Initializing JollyKite App...');
 
+            // RUN AGGRESSIVE CLEANUP FIRST (only if ?nocache or ?debug parameter)
+            if (window.location.href.includes('?nocache=') || window.location.href.includes('?debug=')) {
+                await killAllServiceWorkersAndCaches();
+            }
+
             try {
+                // Dynamic import with cache busting
+                const cacheBuster = '?v=' + Date.now();
+                const { default: App } = await import('./js/App.js' + cacheBuster);
+                const { default: InstallPrompt } = await import('./js/InstallPrompt.js' + cacheBuster);
+
                 jollyKiteApp = new App();
                 const success = await jollyKiteApp.init();
 
