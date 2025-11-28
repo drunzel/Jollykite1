@@ -1,13 +1,14 @@
-import config from './config.js';
-import WindUtils from './utils/WindUtils.js';
-import WindDataManager from './WindDataManager.js';
-import MapController from './MapController.js';
-import ForecastManager from './ForecastManager.js';
-import WindArrowController from './WindArrowController.js';
-import HistoryManager from './HistoryManager.js';
-import WindStatistics from './WindStatistics.js';
-import LanguageManager from './LanguageManager.js';
-import HistoryDisplay from './HistoryDisplay.js';
+// Cache busting for all imports - updated 2024-11-28 02:00
+import config from './config.js?v=20241128_002';
+import WindUtils from './utils/WindUtils.js?v=20241128_002';
+import WindDataManager from './WindDataManager.js?v=20241128_002';
+import MapController from './MapController.js?v=20241128_002';
+import ForecastManager from './ForecastManager.js?v=20241128_002';
+import WindArrowController from './WindArrowController.js?v=20241128_002';
+import HistoryManager from './HistoryManager.js?v=20241128_002';
+import WindStatistics from './WindStatistics.js?v=20241128_002';
+import LanguageManager from './LanguageManager.js?v=20241128_002';
+import HistoryDisplay from './HistoryDisplay.js?v=20241128_002';
 
 class App {
     constructor() {
