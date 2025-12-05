@@ -8,21 +8,33 @@ import HistoryManager from './HistoryManager.js';
 import WindStatistics from './WindStatistics.js';
 import LanguageManager from './LanguageManager.js';
 import HistoryDisplay from './HistoryDisplay.js';
+import SettingsManager from './SettingsManager.js';
+import SettingsUI from './SettingsUI.js';
 
 class App {
     constructor() {
-        // Инициализация языка первым
+        // Initialize settings manager first
+        this.settingsManager = new SettingsManager();
+
+        // Инициализация языка (может быть переопределен настройками)
         this.languageManager = new LanguageManager();
+
+        // Sync language from settings
+        const savedLanguage = this.settingsManager.get('language');
+        if (savedLanguage) {
+            this.languageManager.setLanguage(savedLanguage);
+        }
 
         // Инициализация всех менеджеров
         this.windDataManager = new WindDataManager();
         this.mapController = new MapController();
-        this.forecastManager = new ForecastManager(this.languageManager);
+        this.forecastManager = new ForecastManager(this.languageManager, this.settingsManager);
         this.historyManager = new HistoryManager();
         this.windStatistics = new WindStatistics();
         this.historyDisplay = null; // Будет инициализирован после historyManager
 
         this.windArrowController = null; // Будет инициализирован после карты
+        this.settingsUI = null; // Settings UI controller
         this.updateInterval = null;
         this.isInitialized = false;
         this.lastWindData = null; // Store last wind data for language switching
@@ -31,6 +43,15 @@ class App {
     async init() {
         try {
             console.log('Инициализация JollyKite App...');
+
+            // Инициализация Settings UI
+            this.settingsUI = new SettingsUI(this.settingsManager, this.languageManager);
+            console.log('✓ Settings UI инициализирован');
+
+            // Setup settings change listener
+            this.settingsManager.addListener((settings) => {
+                this.handleSettingsChange(settings);
+            });
 
             // Инициализация языка
             this.initLanguageToggle();
@@ -72,7 +93,7 @@ class App {
             }
 
             // Инициализация отображения истории
-            this.historyDisplay = new HistoryDisplay(this.historyManager, this.languageManager);
+            this.historyDisplay = new HistoryDisplay(this.historyManager, this.languageManager, this.settingsManager);
             if (!this.historyDisplay.init()) {
                 console.warn('⚠ Не удалось инициализировать отображение истории');
             } else {
@@ -553,6 +574,12 @@ class App {
             el.textContent = t(key);
         });
 
+        // Update knots label in settings modal
+        const knotsLabelElement = document.querySelector('.unit-label-knots');
+        if (knotsLabelElement) {
+            knotsLabelElement.textContent = t('knotsLabel');
+        }
+
         // Update footer
         const footer = document.querySelector('footer p');
         if (footer) {
@@ -670,10 +697,14 @@ class App {
         // Apply minimum wind speed filter
         const filteredData = this.windDataManager.applyMinWindSpeedFilter(windData);
 
+        // Convert wind speed based on user settings
+        const displaySpeed = this.settingsManager.convertWindSpeed(windData.windSpeedKnots);
+        const speedUnit = this.settingsManager.getWindSpeedUnitLabel(this.languageManager.getCurrentLanguage());
+
         // Обновление скорости ветра
         const windSpeedElement = document.getElementById('windSpeed');
         if (windSpeedElement) {
-            windSpeedElement.textContent = windData.windSpeedKnots.toFixed(1);
+            windSpeedElement.textContent = displaySpeed.toFixed(1);
 
             // Add visual indicator if below minimum
             if (filteredData.belowMinimum) {
@@ -695,24 +726,70 @@ class App {
             windSpeedIndicator.style.left = `${percentage}%`;
         }
 
+        // Update wind speed unit label (only for main UI, not settings modal)
+        const unitElements = document.querySelectorAll('[data-i18n="knots"]');
+        unitElements.forEach(el => {
+            // Skip if element is inside settings modal
+            if (!el.closest('.settings-modal')) {
+                el.textContent = speedUnit;
+            }
+        });
+
         // Обновление порывов ветра
         const windGustElement = document.getElementById('windGust');
         if (windGustElement) {
+            const displayGust = this.settingsManager.convertWindSpeed(windData.windGustKnots || 0);
             windGustElement.textContent = (windData.windGustKnots !== null && windData.windGustKnots !== undefined)
-                ? windData.windGustKnots.toFixed(1)
+                ? displayGust.toFixed(1)
                 : '--';
         }
 
         // Обновление максимального порыва сегодня
         const maxGustElement = document.getElementById('maxGust');
         if (maxGustElement) {
+            const displayMaxGust = this.settingsManager.convertWindSpeed(windData.maxGustKnots || 0);
             maxGustElement.textContent = (windData.maxGustKnots !== null && windData.maxGustKnots !== undefined)
-                ? windData.maxGustKnots.toFixed(1)
+                ? displayMaxGust.toFixed(1)
                 : '--';
         }
 
         // Обновление направления и описания ветра
         this.updateWindDescription(windData);
+    }
+
+    /**
+     * Handle settings changes
+     */
+    handleSettingsChange(settings) {
+        console.log('Settings changed:', settings);
+
+        // Handle language change
+        if (settings.language !== this.languageManager.getCurrentLanguage()) {
+            this.switchLanguage(settings.language);
+        }
+
+        // Handle update interval change
+        if (settings.updateInterval) {
+            const intervalMs = this.settingsManager.getUpdateIntervalMs();
+            this.stopAutoUpdate();
+            this.startAutoUpdate(intervalMs);
+            console.log(`✓ Update interval changed to ${settings.updateInterval}s`);
+        }
+
+        // Refresh wind data display with new units
+        if (this.lastWindData) {
+            this.updateWindDisplay(this.lastWindData);
+        }
+
+        // Refresh forecast with new units
+        if (this.forecastManager) {
+            this.updateForecast();
+        }
+
+        // Refresh history display with new units
+        if (this.historyDisplay) {
+            this.historyDisplay.refresh();
+        }
     }
 }
 

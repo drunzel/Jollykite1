@@ -103,7 +103,16 @@ const translations = {
         noHistoryYet: 'История пока пуста',
         historyWillAppear: 'Данные начнут появляться после первого измерения',
         justNow: 'только что',
-        oneMinuteAgo: '1 мин назад'
+        oneMinuteAgo: '1 мин назад',
+
+        // Settings
+        settingsTitle: '⚙️ Настройки',
+        windSpeedUnits: 'Единицы скорости ветра',
+        temperatureUnits: 'Единицы температуры',
+        updateInterval: 'Интервал обновления',
+        languageSetting: 'Язык интерфейса',
+        seconds: 'сек',
+        knotsLabel: 'узлов'
     },
 
     en: {
@@ -205,7 +214,16 @@ const translations = {
         noHistoryYet: 'No history yet',
         historyWillAppear: 'Data will appear after first measurement',
         justNow: 'just now',
-        oneMinuteAgo: '1 min ago'
+        oneMinuteAgo: '1 min ago',
+
+        // Settings
+        settingsTitle: '⚙️ Settings',
+        windSpeedUnits: 'Wind speed units',
+        temperatureUnits: 'Temperature units',
+        updateInterval: 'Update interval',
+        languageSetting: 'Interface language',
+        seconds: 'sec',
+        knotsLabel: 'knots'
     }
 };
 

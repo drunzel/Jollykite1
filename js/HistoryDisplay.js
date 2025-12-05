@@ -4,9 +4,10 @@ import WindUtils from './utils/WindUtils.js';
  * HistoryDisplay - Displays wind history table
  */
 class HistoryDisplay {
-    constructor(historyManager, languageManager) {
+    constructor(historyManager, languageManager, settingsManager = null) {
         this.historyManager = historyManager;
         this.languageManager = languageManager;
+        this.settingsManager = settingsManager;
         this.containerId = 'windHistory';
         this.maxDisplayEntries = 20; // Show last 20 entries
         this.autoUpdateInterval = null;
@@ -93,8 +94,13 @@ class HistoryDisplay {
      */
     renderHistoryRow(entry) {
         const time = this.formatTime(entry.timestamp);
-        const speed = entry.windSpeed.toFixed(1);
-        const gust = entry.windGust ? entry.windGust.toFixed(1) : '--';
+
+        // Convert speed to user's preferred units
+        const displaySpeed = this.settingsManager ? this.settingsManager.convertWindSpeed(entry.windSpeed) : entry.windSpeed;
+        const displayGust = (entry.windGust && this.settingsManager) ? this.settingsManager.convertWindSpeed(entry.windGust) : entry.windGust;
+
+        const speed = displaySpeed.toFixed(1);
+        const gust = displayGust ? displayGust.toFixed(1) : '--';
         const direction = WindUtils.degreesToCardinal(entry.windDirection);
         const directionDeg = entry.windDirection.toFixed(0);
 

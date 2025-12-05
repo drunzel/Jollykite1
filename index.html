@@ -175,6 +175,88 @@
     </script>
 </head>
 <body>
+    <!-- Settings Menu Button -->
+    <button class="settings-menu-button" id="settingsMenuButton" aria-label="Настройки">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="3" y1="6" x2="21" y2="6" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <line x1="3" y1="12" x2="21" y2="12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <line x1="3" y1="18" x2="21" y2="18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+    </button>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-modal-overlay" id="settingsModalOverlay"></div>
+        <div class="settings-modal-content">
+            <div class="settings-modal-header">
+                <h2 data-i18n="settingsTitle">⚙️ Настройки</h2>
+                <button class="settings-modal-close" id="settingsModalClose" aria-label="Закрыть">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="settings-modal-body">
+                <!-- Wind Speed Units -->
+                <div class="setting-group">
+                    <label class="setting-label" data-i18n="windSpeedUnits">Единицы скорости ветра</label>
+                    <div class="setting-options">
+                        <button class="setting-option active" data-setting="windSpeedUnit" data-value="knots">
+                            <span class="unit-label-knots">узлов</span>
+                        </button>
+                        <button class="setting-option" data-setting="windSpeedUnit" data-value="ms">
+                            м/с
+                        </button>
+                        <button class="setting-option" data-setting="windSpeedUnit" data-value="kmh">
+                            км/ч
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Temperature Units -->
+                <div class="setting-group">
+                    <label class="setting-label" data-i18n="temperatureUnits">Единицы температуры</label>
+                    <div class="setting-options">
+                        <button class="setting-option" data-setting="temperatureUnit" data-value="celsius">
+                            °C
+                        </button>
+                        <button class="setting-option active" data-setting="temperatureUnit" data-value="fahrenheit">
+                            °F
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Update Interval -->
+                <div class="setting-group">
+                    <label class="setting-label" data-i18n="updateInterval">Интервал обновления</label>
+                    <div class="setting-options">
+                        <button class="setting-option active" data-setting="updateInterval" data-value="30">
+                            30 <span data-i18n="seconds">сек</span>
+                        </button>
+                        <button class="setting-option" data-setting="updateInterval" data-value="60">
+                            60 <span data-i18n="seconds">сек</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Language -->
+                <div class="setting-group">
+                    <label class="setting-label" data-i18n="languageSetting">Язык интерфейса</label>
+                    <div class="setting-options">
+                        <button class="setting-option active" data-setting="language" data-value="ru">
+                            Русский
+                        </button>
+                        <button class="setting-option" data-setting="language" data-value="en">
+                            English
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Language Toggle -->
     <div class="language-toggle" id="languageToggle">
         <span class="lang-option active" data-lang="ru">РУС</span>

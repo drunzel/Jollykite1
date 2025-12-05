@@ -1,7 +1,8 @@
 class ForecastManager {
-    constructor(languageManager = null) {
+    constructor(languageManager = null, settingsManager = null) {
         this.forecastContainer = null;
         this.languageManager = languageManager;
+        this.settingsManager = settingsManager;
     }
 
     init() {
@@ -89,7 +90,11 @@ class ForecastManager {
                 const cardinalDir = getCardinalDirection(hour.direction);
                 const offshore = isOffshore(hour.direction);
                 const currentLang = this.languageManager?.getCurrentLanguage() || 'ru';
-                const knotsText = currentLang === 'ru' ? 'узлов' : 'knots';
+
+                // Convert speed to user's preferred units
+                const displaySpeed = this.settingsManager ? this.settingsManager.convertWindSpeed(hour.speed) : hour.speed;
+                const speedUnit = this.settingsManager ? this.settingsManager.getWindSpeedUnitLabel(currentLang) : (currentLang === 'ru' ? 'узлов' : 'knots');
+
                 const offshoreWarning = offshore ? (currentLang === 'ru' ? '⚠️ ОТЖИМ!' : '⚠️ OFFSHORE!') : '';
 
                 forecastHTML += `
@@ -97,7 +102,7 @@ class ForecastManager {
                          onclick="simulateWind(${hour.direction}, ${hour.speed})"
                          onmouseover="this.style.transform='scaleY(1.2)'; this.style.zIndex='10';"
                          onmouseout="this.style.transform='scaleY(1)'; this.style.zIndex='1';"
-                         title="${hour.time}:00 - ${hour.speed.toFixed(1)} ${knotsText} ${cardinalDir} ${offshoreWarning}">
+                         title="${hour.time}:00 - ${displaySpeed.toFixed(1)} ${speedUnit} ${cardinalDir} ${offshoreWarning}">
                     </div>
                 `;
             });
@@ -111,10 +116,11 @@ class ForecastManager {
             // Добавляем метки времени
             group.forEach((hour, index) => {
                 if (index % 2 === 0 || index === group.length - 1) {
+                    const displaySpeed = this.settingsManager ? this.settingsManager.convertWindSpeed(hour.speed) : hour.speed;
                     forecastHTML += `
                         <div style="text-align: center; flex: 1;">
                             <div style="font-weight: 600; color: rgba(255,255,255,0.9);">${hour.time}:00</div>
-                            <div style="font-size: 0.65rem; margin-top: 2px;">${hour.speed.toFixed(1)}</div>
+                            <div style="font-size: 0.65rem; margin-top: 2px;">${displaySpeed.toFixed(1)}</div>
                         </div>
                     `;
                 } else {
