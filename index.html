@@ -598,19 +598,49 @@
             if (windIcon) windIcon.textContent = '⚠️';
         }
 
-        // Register Service Worker
-        // TEMPORARILY DISABLED FOR CACHE DEBUGGING
-        // Uncomment after cache issues are resolved
-        /*
+        // Register Service Worker with auto-update
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('✓ Service Worker registered:', registration.scope))
-                    .catch(err => console.log('✗ Service Worker registration failed:', err));
+            let refreshing = false;
+
+            // Reload page when new Service Worker takes control
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                console.log('🔄 New Service Worker activated, reloading page...');
+                window.location.reload();
+            });
+
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    console.log('✓ Service Worker registered:', registration.scope);
+
+                    // Check for updates every 60 seconds
+                    setInterval(() => {
+                        registration.update();
+                    }, 60000);
+
+                    // Handle Service Worker updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        console.log('🆕 New Service Worker found, installing...');
+
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New Service Worker installed, skip waiting and activate
+                                console.log('✅ New Service Worker installed, activating...');
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                        });
+                    });
+
+                    // Immediate update check
+                    registration.update();
+                } catch (err) {
+                    console.log('✗ Service Worker registration failed:', err);
+                }
             });
         }
-        */
-        console.log('⚠️ Service Worker registration DISABLED for debugging');
     </script>
 </body>
 </html>

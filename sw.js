@@ -1,7 +1,10 @@
 // JollyKite Service Worker
-const CACHE_NAME = 'jollykite-v1.2.4';
-const API_CACHE_NAME = 'jollykite-api-v1.2.4';
+const VERSION = '1.2.5'; // Increment this on each deployment
+const CACHE_NAME = `jollykite-v${VERSION}`;
+const API_CACHE_NAME = `jollykite-api-v${VERSION}`;
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
+
+console.log(`[SW] Service Worker version ${VERSION} loading...`);
 
 // Ресурсы для кэширования при установке
 const CORE_ASSETS = [
@@ -39,41 +42,60 @@ const API_ENDPOINTS = [
 
 // Установка Service Worker
 self.addEventListener('install', event => {
-  console.log('[SW] Installing...');
+  console.log(`[SW v${VERSION}] Installing...`);
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Caching core assets');
+        console.log(`[SW v${VERSION}] Caching core assets`);
         return cache.addAll(CORE_ASSETS);
       })
       .then(() => {
-        console.log('[SW] Installation complete');
-        self.skipWaiting();
+        console.log(`[SW v${VERSION}] Installation complete`);
+        // Skip waiting to activate immediately
+        return self.skipWaiting();
       })
       .catch(error => {
-        console.error('[SW] Installation failed:', error);
+        console.error(`[SW v${VERSION}] Installation failed:`, error);
       })
   );
 });
 
+// Handle messages from clients
+self.addEventListener('message', event => {
+  console.log(`[SW v${VERSION}] Message received:`, event.data);
+
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log(`[SW v${VERSION}] SKIP_WAITING requested`);
+    self.skipWaiting();
+  }
+
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports[0].postMessage({ version: VERSION });
+  }
+});
+
 // Активация Service Worker
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating...');
+  console.log(`[SW v${VERSION}] Activating...`);
   event.waitUntil(
     caches.keys()
       .then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
             if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
-              console.log('[SW] Deleting old cache:', cacheName);
+              console.log(`[SW v${VERSION}] Deleting old cache:`, cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
       .then(() => {
-        console.log('[SW] Activation complete');
+        console.log(`[SW v${VERSION}] Activation complete, claiming clients`);
+        // Take control of all pages immediately
         return self.clients.claim();
+      })
+      .then(() => {
+        console.log(`[SW v${VERSION}] All clients claimed`);
       })
   );
 });
