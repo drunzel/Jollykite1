@@ -15,13 +15,30 @@ class WindDataManager {
 
     async fetchCurrentWindData() {
         try {
-            const response = await fetch(this.apiUrl);
+            const response = await fetch(this.apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                },
+                mode: 'cors',
+                cache: 'no-cache'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
-            
+
+            // Check if this is an offline response from Service Worker
+            if (result.offline) {
+                throw new Error('Приложение работает в офлайн режиме. Данные недоступны.');
+            }
+
             if (result.data && result.data.length > 0) {
                 const device = result.data[0];
                 const lastData = device.lastData;
-                
+
                 return {
                     windSpeedKnots: WindUtils.mphToKnots(lastData.windspeedmph || 0),
                     windGustKnots: WindUtils.mphToKnots(lastData.windgustmph || 0),
@@ -37,6 +54,19 @@ class WindDataManager {
             throw new Error('Нет данных от устройства');
         } catch (error) {
             console.error('Ошибка загрузки данных о ветре:', error);
+            console.error('Error details:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            });
+
+            // Provide more user-friendly error message
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                throw new Error('Не удалось подключиться к серверу данных. Проверьте подключение к интернету.');
+            } else if (error.message.includes('CORS')) {
+                throw new Error('Ошибка доступа к данным (CORS). Попробуйте обновить страницу.');
+            }
+
             throw error;
         }
     }

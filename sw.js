@@ -1,6 +1,6 @@
 // JollyKite Service Worker
-const CACHE_NAME = 'jollykite-v1.2.3';
-const API_CACHE_NAME = 'jollykite-api-v1.2.3';
+const CACHE_NAME = 'jollykite-v1.2.4';
+const API_CACHE_NAME = 'jollykite-api-v1.2.4';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
 
 // Ресурсы для кэширования при установке
@@ -139,11 +139,17 @@ function isHTMLRequest(request) {
 // Обработка API запросов
 async function handleApiRequest(request) {
   const url = request.url;
-  
+
   try {
     // Попытка получить данные из сети
-    const response = await fetch(request);
-    
+    console.log('[SW] Fetching API request:', url);
+    const response = await fetch(request, {
+      mode: 'cors',
+      credentials: 'omit'
+    });
+
+    console.log('[SW] API response status:', response.status, response.ok);
+
     if (response.ok) {
       // Кэшируем успешный ответ с временной меткой
       const cache = await caches.open(API_CACHE_NAME);
@@ -156,23 +162,23 @@ async function handleApiRequest(request) {
           'sw-cached-at': Date.now().toString()
         }
       });
-      
+
       await cache.put(request, responseWithTimestamp);
       console.log('[SW] API response cached:', url);
       return response;
     }
   } catch (error) {
-    console.log('[SW] Network failed for API request:', url);
+    console.error('[SW] Network failed for API request:', url, error);
   }
-  
+
   // Fallback на кэшированные данные
   const cache = await caches.open(API_CACHE_NAME);
   const cachedResponse = await cache.match(request);
-  
+
   if (cachedResponse) {
     const cachedAt = cachedResponse.headers.get('sw-cached-at');
     const isExpired = cachedAt && (Date.now() - parseInt(cachedAt)) > CACHE_DURATION;
-    
+
     if (!isExpired) {
       console.log('[SW] Serving cached API response:', url);
       return cachedResponse;
@@ -181,8 +187,9 @@ async function handleApiRequest(request) {
       await cache.delete(request);
     }
   }
-  
+
   // Если нет кэша или он устарел, возвращаем офлайн ответ
+  console.log('[SW] Returning offline response for:', url);
   return new Response(JSON.stringify({
     offline: true,
     message: 'Данные недоступны офлайн',
