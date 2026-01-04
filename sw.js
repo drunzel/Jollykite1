@@ -1,8 +1,9 @@
 // JollyKite Service Worker
-const VERSION = '1.2.5'; // Increment this on each deployment
+const VERSION = '1.2.6'; // Increment this on each deployment - Optimized caching
 const CACHE_NAME = `jollykite-v${VERSION}`;
 const API_CACHE_NAME = `jollykite-api-v${VERSION}`;
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
+const FORECAST_CACHE_DURATION = 5 * 60 * 1000; // 5 минут для прогноза (он редко меняется)
 
 console.log(`[SW] Service Worker version ${VERSION} loading...`);
 
@@ -161,6 +162,8 @@ function isHTMLRequest(request) {
 // Обработка API запросов
 async function handleApiRequest(request) {
   const url = request.url;
+  const isForecastRequest = url.includes('open-meteo.com');
+  const cacheDuration = isForecastRequest ? FORECAST_CACHE_DURATION : CACHE_DURATION;
 
   try {
     // Попытка получить данные из сети
@@ -186,7 +189,7 @@ async function handleApiRequest(request) {
       });
 
       await cache.put(request, responseWithTimestamp);
-      console.log('[SW] API response cached:', url);
+      console.log(`[SW] API response cached (TTL: ${cacheDuration/1000}s):`, url);
       return response;
     }
   } catch (error) {
@@ -199,10 +202,11 @@ async function handleApiRequest(request) {
 
   if (cachedResponse) {
     const cachedAt = cachedResponse.headers.get('sw-cached-at');
-    const isExpired = cachedAt && (Date.now() - parseInt(cachedAt)) > CACHE_DURATION;
+    const isExpired = cachedAt && (Date.now() - parseInt(cachedAt)) > cacheDuration;
 
     if (!isExpired) {
-      console.log('[SW] Serving cached API response:', url);
+      const cacheAge = Math.round((Date.now() - parseInt(cachedAt)) / 1000);
+      console.log(`[SW] Serving cached API response (age: ${cacheAge}s):`, url);
       return cachedResponse;
     } else {
       console.log('[SW] Cached API response expired:', url);

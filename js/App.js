@@ -38,6 +38,25 @@ class App {
         this.updateInterval = null;
         this.isInitialized = false;
         this.lastWindData = null; // Store last wind data for language switching
+
+        // Cache for preventing redundant fetches
+        this.forecastCache = {
+            data: null,
+            timestamp: null,
+            ttl: 5 * 60 * 1000 // 5 минут cache для прогноза
+        };
+
+        // Debounce timers
+        this.debounceTimers = {
+            forecast: null,
+            windData: null
+        };
+
+        // Prevent multiple simultaneous fetches
+        this.fetchInProgress = {
+            forecast: false,
+            windData: false
+        };
     }
 
     async init() {
@@ -139,7 +158,14 @@ class App {
     }
 
     async updateWindData() {
+        // Prevent multiple simultaneous fetches
+        if (this.fetchInProgress.windData) {
+            console.log('⏸ Wind data fetch already in progress, skipping...');
+            return this.lastWindData;
+        }
+
         try {
+            this.fetchInProgress.windData = true;
             const windData = await this.windDataManager.fetchCurrentWindDataFromSource();
 
             // Получение информации о безопасности
@@ -182,6 +208,8 @@ class App {
         } catch (error) {
             console.error('Ошибка обновления данных о ветре:', error);
             throw error;
+        } finally {
+            this.fetchInProgress.windData = false;
         }
     }
 
@@ -349,14 +377,39 @@ class App {
         }
     }
 
-    async updateForecast() {
+    async updateForecast(forceRefresh = false) {
+        // Check cache first
+        const now = Date.now();
+        if (!forceRefresh && this.forecastCache.data && this.forecastCache.timestamp) {
+            const cacheAge = now - this.forecastCache.timestamp;
+            if (cacheAge < this.forecastCache.ttl) {
+                console.log(`✓ Using cached forecast (age: ${Math.round(cacheAge/1000)}s)`);
+                this.forecastManager.displayForecast(this.forecastCache.data);
+                return;
+            }
+        }
+
+        // Prevent multiple simultaneous fetches
+        if (this.fetchInProgress.forecast) {
+            console.log('⏸ Forecast fetch already in progress, skipping...');
+            return;
+        }
+
         try {
+            this.fetchInProgress.forecast = true;
             this.forecastManager.showLoading();
             const forecastData = await this.windDataManager.fetchWindForecast();
+
+            // Update cache
+            this.forecastCache.data = forecastData;
+            this.forecastCache.timestamp = now;
+
             this.forecastManager.displayForecast(forecastData);
         } catch (error) {
             this.forecastManager.showError(error);
             throw error;
+        } finally {
+            this.fetchInProgress.forecast = false;
         }
     }
 
@@ -472,6 +525,14 @@ class App {
         // Остановка автообновления
         this.stopAutoUpdate();
 
+        // Очистка debounce таймеров
+        Object.keys(this.debounceTimers).forEach(key => {
+            if (this.debounceTimers[key]) {
+                clearTimeout(this.debounceTimers[key]);
+                this.debounceTimers[key] = null;
+            }
+        });
+
         // Очистка карты
         this.mapController.destroy();
 
@@ -518,20 +579,20 @@ class App {
             this.updateLanguageToggleUI(lang);
             this.updateUILanguage();
 
-            // Refresh wind data display with new language
+            // Refresh wind data display with new language (no API call)
             if (this.lastWindData) {
                 this.updateWindDisplay(this.lastWindData);
             }
 
-            // Refresh wind trend with new language
+            // Refresh wind trend with new language (no API call)
             this.updateWindTrend();
 
-            // Refresh forecast with new language
-            if (this.forecastManager) {
-                this.updateForecast();
+            // Refresh forecast with cached data (no API call needed)
+            if (this.forecastManager && this.forecastCache.data) {
+                this.forecastManager.displayForecast(this.forecastCache.data);
             }
 
-            // Refresh history display with new language
+            // Refresh history display with new language (no API call)
             if (this.historyDisplay) {
                 this.historyDisplay.refresh();
             }
@@ -626,6 +687,11 @@ class App {
         if (this.windDataManager.setDataSource(source)) {
             this.updateSourceToggleUI(source);
 
+            // Debounce to prevent rapid source switching
+            if (this.debounceTimers.windData) {
+                clearTimeout(this.debounceTimers.windData);
+            }
+
             // Show loading indicator
             const windTitle = document.getElementById('windTitle');
             const windSubtitle = document.getElementById('windSubtitle');
@@ -634,20 +700,22 @@ class App {
             if (windTitle) windTitle.textContent = t('loadingData');
             if (windSubtitle) windSubtitle.textContent = t('pleaseWait');
 
-            // Refresh data from new source
-            try {
-                await this.updateWindData();
-                console.log(`✓ Data source switched to: ${config.dataSource.sources[source].name}`);
-            } catch (error) {
-                console.error('Error switching data source:', error);
-                // Show error message specific to Windguru
-                if (source === 'windguru') {
-                    if (windTitle) windTitle.textContent = 'Windguru недоступен';
-                    if (windSubtitle) windSubtitle.textContent = 'Требуется настройка backend. Используйте Ambient Weather.';
-                } else {
-                    this.showWindError('Ошибка загрузки данных');
+            // Debounced data fetch
+            this.debounceTimers.windData = setTimeout(async () => {
+                try {
+                    await this.updateWindData();
+                    console.log(`✓ Data source switched to: ${config.dataSource.sources[source].name}`);
+                } catch (error) {
+                    console.error('Error switching data source:', error);
+                    // Show error message specific to Windguru
+                    if (source === 'windguru') {
+                        if (windTitle) windTitle.textContent = 'Windguru недоступен';
+                        if (windSubtitle) windSubtitle.textContent = 'Требуется настройка backend. Используйте Ambient Weather.';
+                    } else {
+                        this.showWindError('Ошибка загрузки данных');
+                    }
                 }
-            }
+            }, 300); // 300ms debounce
         }
     }
 
@@ -776,17 +844,17 @@ class App {
             console.log(`✓ Update interval changed to ${settings.updateInterval}s`);
         }
 
-        // Refresh wind data display with new units
+        // Refresh wind data display with new units (no API call)
         if (this.lastWindData) {
             this.updateWindDisplay(this.lastWindData);
         }
 
-        // Refresh forecast with new units
-        if (this.forecastManager) {
-            this.updateForecast();
+        // Refresh forecast with cached data and new units (no API call)
+        if (this.forecastManager && this.forecastCache.data) {
+            this.forecastManager.displayForecast(this.forecastCache.data);
         }
 
-        // Refresh history display with new units
+        // Refresh history display with new units (no API call)
         if (this.historyDisplay) {
             this.historyDisplay.refresh();
         }
