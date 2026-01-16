@@ -300,6 +300,8 @@ class App {
         if (windIcon) windIcon.textContent = windDesc.icon;
         if (windTitle) windTitle.textContent = windDesc.title;
 
+        // COMMENTED OUT: windSubtitle safety messages removed per user request
+        /*
         // windSubtitle показывает только статус безопасности и тип ветра (без скорости)
         if (windSubtitle && windData.safety) {
             let safetyText = '';
@@ -326,6 +328,12 @@ class App {
             windSubtitle.textContent = safetyText;
             windSubtitle.style.color = textColor;
             windSubtitle.style.fontWeight = '600';
+        }
+        */
+
+        // Hide windSubtitle element
+        if (windSubtitle) {
+            windSubtitle.style.display = 'none';
         }
 
         // Обновление направления ветра (румб)

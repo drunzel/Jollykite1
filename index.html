@@ -145,33 +145,7 @@
             setTimeout(() => location.reload(true), 500);
         }
 
-        // Show clear cache button if ?debug=true
-        if (window.location.href.includes('?debug=true') || window.location.href.includes('?nocache=')) {
-            window.addEventListener('load', () => {
-                const btn = document.createElement('button');
-                btn.textContent = '🗑️ Очистить кеш';
-                btn.style.cssText = `
-                    position: fixed;
-                    top: 70px;
-                    right: 20px;
-                    z-index: 99999;
-                    background: #ef4444;
-                    color: white;
-                    border: none;
-                    padding: 10px 15px;
-                    border-radius: 8px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-                `;
-                btn.onclick = () => {
-                    if (confirm('Очистить весь кеш и перезагрузить?')) {
-                        window.clearAllCaches();
-                    }
-                };
-                document.body.appendChild(btn);
-            });
-        }
+        // Clear cache button removed - use browser DevTools or console: clearAllCaches()
     </script>
 </head>
 <body>
@@ -366,7 +340,7 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header class="text-center py-8 sm:py-12 animate-fadeInDown">
+        <header class="text-center animate-fadeInDown" style="padding-top: 120px !important; padding-bottom: 30px !important;">
             <h1 class="font-dancing text-5xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent drop-shadow-lg mb-4 tracking-wide animate-shimmer">
                 Pak Nam Pran
             </h1>
@@ -429,7 +403,7 @@
                         <div id="windIcon" style="font-size: 2.5rem; line-height: 1;">🍃</div>
                         <div style="flex: 1; text-align: left;">
                             <div id="windTitle" style="font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 3px;" data-i18n="loadingData">Загружаем данные...</div>
-                            <div id="windSubtitle" style="font-size: 0.85rem; margin-top: 2px;" data-i18n="pleaseWait">Подождите немного</div>
+                            <div id="windSubtitle" style="font-size: 0.85rem; margin-top: 2px; display: none;" data-i18n="pleaseWait">Подождите немного</div>
                         </div>
                     </div>
                 </div>
