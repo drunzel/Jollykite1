@@ -200,7 +200,8 @@ const config = {
     // Arrow is centered on kiter position for maximum visibility
     windArrow: {
         // Global angle correction applied to all arrow rotations
-        globalAngle: 0,
+        // -90° rotates the arrow 90 degrees counter-clockwise
+        globalAngle: -90,
 
         // Directional offsets for 8 cardinal directions (in lat/lng degrees)
         // Set to zero to keep arrow centered on kiter position
